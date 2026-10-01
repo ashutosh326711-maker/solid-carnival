@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>YUVI BATTLE ZONE</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-user-select:none;
+    user-select:none;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#071018;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+canvas{
+    display:block;
+    background:#18251c;
+}
+
+#hud{
+    position:fixed;
+    top:10px;
+    left:10px;
+    right:10px;
+    z-index:10;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+}
+
+.card{
+    background:rgba(4,10,16,.82);
+    color:white;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:12px;
+    padding:8px 12px;
+    min-width:100px;
+    box-shadow:0 5px 20px #0007;
+}
+
+.card small{
+    color:#aab5bf;
+    display:block;
+    font-size:10px;
+}
+
+.card b{
+    color:#00eaff;
+    font-size:17px;
+}
+
+#healthOuter{
+    width:160px;
+    height:12px;
+    background:#202832;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:5px;
+}
+
+#health{
+    width:100%;
+    height:100%;
+    background:#25e66f;
+}
+
+#armorOuter{
+    width:160px;
+    height:7px;
+    background:#202832;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:4px;
+}
+
+#armor{
+    width:50%;
+    height:100%;
+    background:#35a9ff;
+}
+
+#mission{
+    position:fixed;
+    z-index:11;
+    left:50%;
+    transform:translateX(-50%);
+    top:80px;
+    color:white;
+    background:#000b;
+    border:1px solid #ffffff30;
+    border-radius:14px;
+    padding:9px 16px;
+    text-align:center;
+    font-size:13px;
+    min-width:240px;
+}
+
+#controls{
+    position:fixed;
+    z-index:20;
+    inset:0;
+    pointer-events:none;
+}
+
+.btn{
+    position:absolute;
+    pointer-events:auto;
+    width:62px;
+    height:62px;
+    border-radius:50%;
+    border:1px solid #ffffff40;
+    background:#07101dcc;
+    color:white;
+    font-size:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 5px 20px #0008;
+}
+
+.btn:active{
+    transform:scale(.9);
+}
+
+#up{left:72px;bottom:140px}
+#down{left:72px;bottom:20px}
+#left{left:8px;bottom:80px}
+#right{left:136px;bottom:80px}
+
+#fire{
+    right:22px;
+    bottom:35px;
+    width:86px;
+    height:86px;
+    background:#e31b35dd;
+    font-size:30px;
+}
+
+#reload{
+    right:125px;
+    bottom:45px;
+}
+
+#emote{
+    right:125px;
+    bottom:125px;
+}
+
+#menu{
+    position:fixed;
+    z-index:100;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(circle at center,#16394a,#05090d 70%);
+    color:white;
+    text-align:center;
+}
+
+.panel{
+    width:min(470px,92vw);
+    max-height:92vh;
+    overflow:auto;
+    padding:30px 22px;
+    border-radius:25px;
+    background:#0d1721ee;
+    border:1px solid #ffffff22;
+    box-shadow:0 20px 80px #000;
+}
+
+.logo{
+    font-size:43px;
+    font-weight:900;
+    letter-spacing:2px;
+    background:linear-gradient(90deg,#00eaff,#ff2b7a,#ffd000);
+    -webkit-background-clip:text;
+    color:transparent;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    color:#aebac4;
+    line-height:1.5;
+    margin-bottom:20px;
+}
+
+.start{
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:13px;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    background:linear-gradient(90deg,#ff1744,#ff007a);
+    margin-top:10px;
+}
+
+.info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:18px;
+}
+
+.info div{
+    padding:10px;
+    border-radius:10px;
+    background:#ffffff0c;
+    color:#cbd5dc;
+    font-size:12px;
+}
+
+#gameOver{
+    display:none;
+}
+
+#pause{
+    position:fixed;
+    z-index:30;
+    right:12px;
+    top:100px;
+    width:45px;
+    height:45px;
+    border:0;
+    border-radius:12px;
+    background:#000b;
+    color:white;
+    font-size:20px;
+}
+
+#emoteText{
+    position:fixed;
+    z-index:40;
+    left:50%;
+    top:45%;
+    transform:translate(-50%,-50%);
+    font-size:65px;
+    display:none;
+    animation:pop .9s ease;
+}
+
+@keyframes pop{
+    0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
+    40%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+    100%{transform:translate(-50%,-50%) scale(1);opacity:0}
+}
+
+@media(min-width:800px){
+    #controls .btn{
+        opacity:.75;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+
+    <div class="card">
+        <small>PLAYER</small>
+        <b>YUVI</b>
+        <div id="healthOuter">
+            <div id="health"></div>
+        </div>
+        <div id="armorOuter">
+            <div id="armor"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <small>LEVEL</small>
+        <b id="level">1 / 100</b>
+    </div>
+
+    <div class="card">
+        <small>SCORE</small>
+        <b id="score">0</b>
+    </div>
+
+</div>
+
+<div id="mission">
+    Mission loading...
+</div>
+
+<button id="pause">Ⅱ</button>
+
+<div id="controls">
+
+    <button class="btn" id="up">▲</button>
+    <button class="btn" id="down">▼</button>
+    <button class="btn" id="left">◀</button>
+    <button class="btn" id="right">▶</button>
+
+    <button class="btn" id="fire">●</button>
+    <button class="btn" id="reload">↻</button>
+    <button class="btn" id="emote">😎</button>
+
+</div>
+
+<div id="emoteText">😎</div>
+
+
+<!-- START SCREEN -->
+
+<div id="menu">
+
+<div class="panel">
+
+<div class="logo">YUVI<br>BATTLE ZONE</div>
+
+<div class="subtitle">
+100 LEVEL OFFLINE ADVENTURE
+<br>
+Explore the map, defeat enemy bots,
+complete missions and unlock new levels.
+</div>
+
+<button class="start" onclick="startGame()">
+START GAME 🚀
+</button>
+
+<div class="info">
+<div>🎯 100 Missions</div>
+<div>🗺️ Large Map</div>
+<div>🤖 Enemy Bots</div>
+<div>🔫 Energy Blaster</div>
+<div>🎒 Loot System</div>
+<div>💃 Emotes</div>
+<div>📱 Mobile Controls</div>
+<div>💾 Auto Save</div>
+</div>
+
+</div>
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOver" class="menu">
+
+<div class="panel">
+
+<div class="logo">MISSION COMPLETE</div>
+
+<div id="resultText"></div>
+
+<button class="start"
+        onclick="nextLevel()">
+NEXT LEVEL ➜
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+const canvas =
+document.getElementById("game");
+
+const ctx =
+canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+    W=canvas.width=innerWidth;
+    H=canvas.height=innerHeight;
+}
+
+addEventListener("resize",resize);
+resize();
+
+
+/* =========================
+   GAME STATE
+========================= */
+
+let playing=false;
+let paused=false;
+
+let level=1;
+let score=0;
+let xp=0;
+
+let health=100;
+let armor=50;
+
+let ammo=12;
+let maxAmmo=12;
+
+let kills=0;
+let missionTarget=3;
+
+let missionType="eliminate";
+
+let camera={
+    x:0,
+    y:0
+};
+
+let player={
+    x:700,
+    y:700,
+    r:20,
+    speed:3.5,
+    angle:0
+};
+
+let enemies=[];
+let bullets=[];
+let loot=[];
+let particles=[];
+
+const MAP=2200;
+
+let keys={};
+
+
+/* =========================
+   MISSIONS
+========================= */
+
+const missionNames=[
+    "Clear the zone",
+    "Enemy patrol",
+    "Danger sector",
+    "Supply mission",
+    "Final checkpoint"
+];
+
+function setupMission(){
+
+    missionTarget =
+        Math.min(
+            3 + Math.floor(level/4),
+            20
+        );
+
+    kills=0;
+
+    missionType =
+        level%5===0
+        ? "collect"
+        : "eliminate";
+
+    if(missionType==="collect"){
+
+        for(let i=0;i<missionTarget;i++){
+            spawnLoot();
+        }
+
+    }
+
+    updateMission();
+}
+
+function updateMission(){
+
+    if(missionType==="eliminate"){
+
+        document.getElementById(
+            "mission"
+        ).innerHTML =
+        "🎯 "+missionNames[level%missionNames.length]+
+        "<br><b>Defeat "+kills+" / "+missionTarget+"</b>";
+
+    }else{
+
+        document.getElementById(
+            "mission"
+        ).innerHTML =
+        "🎒 Supply Mission"+
+        "<br><b>Collect "+kills+" / "+missionTarget+"</b>";
+
+    }
+}
+
+
+/* =========================
+   START
+========================= */
+
+function startGame(){
+
+    document.getElementById(
+        "menu"
+    ).style.display="none";
+
+    playing=true;
+    paused=false;
+
+    loadProgress();
+
+    resetPlayer();
+
+    setupMission();
+
+    spawnEnemies();
+
+    requestAnimationFrame(loop);
+}
+
+
+/* =========================
+   SAVE
+========================= */
+
+function saveProgress(){
+
+    localStorage.setItem(
+        "yuviBattleSave",
+        JSON.stringify({
+            level,
+            score,
+            xp
+        })
+    );
+}
+
+function loadProgress(){
+
+    const data=
+        JSON.parse(
+            localStorage.getItem(
+                "yuviBattleSave"
+            ) || "null"
+        );
+
+    if(data){
+
+        level=data.level||1;
+        score=data.score||0;
+        xp=data.xp||0;
+
+    }
+
+    updateHUD();
+}
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetPlayer(){
+
+    player.x=MAP/2;
+    player.y=MAP/2;
+
+    health=100;
+    armor=50;
+
+    ammo=maxAmmo;
+
+    enemies=[];
+    bullets=[];
+    loot=[];
+    particles=[];
+
+    camera.x=0;
+    camera.y=0;
+
+}
+
+
+/* =========================
+   SPAWN ENEMIES
+========================= */
+
+function spawnEnemies(){
+
+    const count =
+        Math.min(
+            4+Math.floor(level/3),
+            18
+        );
+
+    for(
+        let i=0;
+        i<count;
+        i++
+    ){
+
+        let x;
+        let y;
+
+        do{
+
+            x=100+Math.random()*(MAP-200);
+            y=100+Math.random()*(MAP-200);
+
+        }while(
+            Math.hypot(
+                x-player.x,
+                y-player.y
+            )<300
+        );
+
+        enemies.push({
+
+            x,
+            y,
+
+            r:18,
+
+            hp:
+                35+
+                level*2,
+
+            maxHp:
+                35+
+                level*2,
+
+            speed:
+                0.45+
+                level*.006,
+
+            attackCooldown:0,
+
+            color:
+                ["#ff465d",
+                 "#ff9f1c",
+                 "#b76cff"]
+                [Math.floor(Math.random()*3)]
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   LOOT
+========================= */
+
+function spawnLoot(){
+
+    loot.push({
+
+        x:
+        100+
+        Math.random()*(MAP-200),
+
+        y:
+        100+
+        Math.random()*(MAP-200),
+
+        type:
+        Math.random()<.5
+        ?"medkit"
+        :"armor"
+
+    });
+
+}
+
+
+/* =========================
+   SHOOT
+========================= */
+
+function shoot(){
+
+    if(!playing || paused)
+        return;
+
+    if(ammo<=0){
+
+        reload();
+        return;
+
+    }
+
+    ammo--;
+
+    const angle=
+        player.angle;
+
+    bullets.push({
+
+        x:
+        player.x+
+        Math.cos(angle)*25,
+
+        y:
+        player.y+
+        Math.sin(angle)*25,
+
+        vx:
+        Math.cos(angle)*10,
+
+        vy:
+        Math.sin(angle)*10,
+
+        life:70
+
+    });
+
+}
+
+
+/* =========================
+   RELOAD
+========================= */
+
+function reload(){
+
+    ammo=maxAmmo;
+
+}
+
+
+/* =========================
+   UPDATE
+========================= */
+
+function update(){
+
+    if(!playing || paused)
+        return;
+
+    movePlayer();
+    updateEnemies();
+    updateBullets();
+    updateLoot();
+    updateParticles();
+
+    camera.x =
+        player.x-W/2;
+
+    camera.y =
+        player.y-H/2;
+
+    camera.x =
+        Math.max(
+            0,
+            Math.min(
+                MAP-W,
+                camera.x
+            )
+        );
+
+    camera.y =
+        Math.max(
+            0,
+            Math.min(
+                MAP-H,
+                camera.y
+            )
+        );
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   PLAYER
+========================= */
+
+function movePlayer(){
+
+    let dx=0;
+    let dy=0;
+
+    if(keys["ArrowUp"]||keys["w"])
+        dy--;
+
+    if(keys["ArrowDown"]||keys["s"])
+        dy++;
+
+    if(keys["ArrowLeft"]||keys["a"])
+        dx--;
+
+    if(keys["ArrowRight"]||keys["d"])
+        dx++;
+
+    if(dx||dy){
+
+        const len=
+            Math.hypot(dx,dy);
+
+        dx/=len;
+        dy/=len;
+
+        player.x +=
+            dx*player.speed;
+
+        player.y +=
+            dy*player.speed;
+
+        player.angle=
+            Math.atan2(dy,dx);
+
+    }
+
+    player.x=
+        Math.max(
+            30,
+            Math.min(
+                MAP-30,
+                player.x
+            )
+        );
+
+    player.y=
+        Math.max(
+            30,
+            Math.min(
+                MAP-30,
+                player.y
+            )
+        );
+
+}
+
+
+/* =========================
+   ENEMIES
+========================= */
+
+function updateEnemies(){
+
+    enemies.forEach(enemy=>{
+
+        const dx=
+            player.x-enemy.x;
+
+        const dy=
+            player.y-enemy.y;
+
+        const dist=
+            Math.hypot(dx,dy);
+
+        if(dist>55){
+
+            enemy.x +=
+                dx/dist*
+                enemy.speed;
+
+            enemy.y +=
+                dy/dist*
+                enemy.speed;
+
+        }else{
+
+            enemy.attackCooldown--;
+
+            if(enemy.attackCooldown<=0){
+
+                damagePlayer(
+                    4+
+                    Math.floor(level/10)
+                );
+
+                enemy.attackCooldown=45;
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =========================
+   DAMAGE
+========================= */
+
+function damagePlayer(amount){
+
+    if(armor>0){
+
+        const absorbed=
+            Math.min(
+                armor,
+                amount*.6
+            );
+
+        armor-=absorbed;
+
+        amount-=absorbed;
+
+    }
+
+    health-=amount;
+
+    if(health<=0){
+
+        health=0;
+
+        gameOver();
+
+    }
+
+}
+
+
+/* =========================
+   BULLETS
+========================= */
+
+function updateBullets(){
+
+    bullets.forEach(
+    (b,bi)=>{
+
+        b.x+=b.vx;
+        b.y+=b.vy;
+        b.life--;
+
+        enemies.forEach(
+        (enemy,ei)=>{
+
+            if(
+                Math.hypot(
+                    b.x-enemy.x,
+                    b.y-enemy.y
+                )<
+                enemy.r+5
+            ){
+
+                enemy.hp-=20;
+
+                createParticles(
+                    enemy.x,
+                    enemy.y
+                );
+
+                b.life=0;
+
+                if(enemy.hp<=0){
+
+                    enemies.splice(
+                        ei,
+                        1
+                    );
+
+                    kills++;
+
+                    score+=100;
+
+                    xp+=20;
+
+                    updateMission();
+
+                    if(
+                        missionType==="eliminate" &&
+                        kills>=missionTarget
+                    ){
+
+                        completeLevel();
+
+                    }
+
+                }
+
+            }
+
+        });
+
+        if(
+            b.life<=0 ||
+            b.x<0 ||
+            b.y<0 ||
+            b.x>MAP ||
+            b.y>MAP
+        ){
+
+            bullets.splice(
+                bi,
+                1
+            );
+
+        }
+
+    });
+
+}
+
+
+/* =========================
+   LOOT
+========================= */
+
+function updateLoot(){
+
+    loot.forEach(
+    (item,index)=>{
+
+        if(
+            Math.hypot(
+                item.x-player.x,
+                item.y-player.y
+            )<35
+        ){
+
+            if(item.type==="medkit"){
+
+                health=
+                    Math.min(
+                        100,
+                        health+30
+                    );
+
+            }else{
+
+                armor=
+                    Math.min(
+                        100,
+                        armor+40
+                    );
+
+            }
+
+            loot.splice(
+                index,
+                1
+            );
+
+            kills++;
+
+            score+=50;
+
+            updateMission();
+
+            if(
+                missionType==="collect" &&
+                kills>=missionTarget
+            ){
+
+                completeLevel();
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function createParticles(x,y){
+
+    for(let i=0;i<7;i++){
+
+        particles.push({
+
+            x,
+            y,
+
+            vx:
+                (Math.random()-.5)*4,
+
+            vy:
+                (Math.random()-.5)*4,
+
+            life:25
+
+        });
+
+    }
+
+}
+
+function updateParticles(){
+
+    particles.forEach(
+    (p,i)=>{
+
+        p.x+=p.vx;
+        p.y+=p.vy;
+        p.life--;
+
+        if(p.life<=0)
+            particles.splice(i,1);
+
+    });
+
+}
+
+
+/* =========================
+   DRAW
+========================= */
+
+function draw(){
+
+    ctx.clearRect(
+        0,0,W,H
+    );
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    drawMap();
+    drawLoot();
+    drawBullets();
+    drawEnemies();
+    drawPlayer();
+    drawParticles();
+
+    ctx.restore();
+
+    drawMiniMap();
+
+}
+
+
+/* =========================
+   MAP
+========================= */
+
+function drawMap(){
+
+    ctx.fillStyle="#244b2b";
+
+    ctx.fillRect(
+        0,
+        0,
+        MAP,
+        MAP
+    );
+
+    /* grid */
+
+    ctx.strokeStyle="#ffffff08";
+    ctx.lineWidth=1;
+
+    for(
+        let x=0;
+        x<MAP;
+        x+=80
+    ){
+
+        ctx.beginPath();
+        ctx.moveTo(x,0);
+        ctx.lineTo(x,MAP);
+        ctx.stroke();
+
+    }
+
+    for(
+        let y=0;
+        y<MAP;
+        y+=80
+    ){
+
+        ctx.beginPath();
+        ctx.moveTo(0,y);
+        ctx.lineTo(MAP,y);
+        ctx.stroke();
+
+    }
+
+    /* roads */
+
+    ctx.fillStyle="#343b3c";
+
+    ctx.fillRect(
+        0,
+        1050,
+        MAP,
+        120
+    );
+
+    ctx.fillRect(
+        1040,
+        0,
+        120,
+        MAP
+    );
+
+    /* water */
+
+    ctx.fillStyle="#17658a";
+
+    ctx.fillRect(
+        150,
+        160,
+        430,
+        250
+    );
+
+    /* buildings */
+
+    for(
+        let i=0;
+        i<32;
+        i++
+    ){
+
+        const x=
+            100+
+            (i*173)%1900;
+
+        const y=
+            100+
+            (i*97)%1900;
+
+        ctx.fillStyle=
+            i%2
+            ?"#59626b"
+            :"#70584c";
+
+        ctx.fillRect(
+            x,
+            y,
+            85,
+            65
+        );
+
+        ctx.fillStyle="#222";
+
+        ctx.fillRect(
+            x+12,
+            y+12,
+            18,
+            18
+        );
+
+        ctx.fillRect(
+            x+53,
+            y+12,
+            18,
+            18
+        );
+
+    }
+
+}
+
+
+/* =========================
+   PLAYER DRAW
+========================= */
+
+function drawPlayer(){
+
+    ctx.save();
+
+    ctx.translate(
+        player.x,
+        player.y
+    );
+
+    ctx.rotate(
+        player.angle
+    );
+
+    /* shadow */
+
+    ctx.fillStyle="#0007";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        7,
+        25,
+        12,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* body */
+
+    ctx.fillStyle="#00bcd4";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        player.r,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* helmet */
+
+    ctx.fillStyle="#eafaff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        5,
+        -5,
+        11,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* weapon */
+
+    ctx.fillStyle="#222";
+
+    ctx.fillRect(
+        8,
+        -4,
+        28,
+        8
+    );
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ENEMY DRAW
+========================= */
+
+function drawEnemies(){
+
+    enemies.forEach(
+    e=>{
+
+        ctx.fillStyle="#0008";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            e.x,
+            e.y+8,
+            23,
+            10,
+            0,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle=e.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            e.x,
+            e.y,
+            e.r,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle="#fff";
+
+        ctx.fillRect(
+            e.x-8,
+            e.y-7,
+            16,
+            6
+        );
+
+        /* HP */
+
+        ctx.fillStyle="#111";
+
+        ctx.fillRect(
+            e.x-22,
+            e.y-31,
+            44,
+            5
+        );
+
+        ctx.fillStyle="#35e66f";
+
+        ctx.fillRect(
+            e.x-22,
+            e.y-31,
+            44*
+            Math.max(
+                0,
+                e.hp/e.maxHp
+            ),
+            5
+        );
+
+    });
+
+}
+
+
+/* =========================
+   BULLETS DRAW
+========================= */
+
+function drawBullets(){
+
+    bullets.forEach(
+    b=>{
+
+        ctx.fillStyle="#ffe600";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            b.x,
+            b.y,
+            4,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+    });
+
+}
+
+
+/* =========================
+   LOOT DRAW
+========================= */
+
+function drawLoot(){
+
+    loot.forEach(
+    item=>{
+
+        ctx.fillStyle=
+            item.type==="medkit"
+            ?"#24e66b"
+            :"#35a9ff";
+
+        ctx.fillRect(
+            item.x-13,
+            item.y-13,
+            26,
+            26
+        );
+
+        ctx.fillStyle="#fff";
+
+        ctx.font="bold 16px Arial";
+
+        ctx.textAlign="center";
+
+        ctx.fillText(
+            item.type==="medkit"
+            ?"✚"
+            :"◆",
+            item.x,
+            item.y+6
+        );
+
+    });
+
+}
+
+
+/* =========================
+   PARTICLES DRAW
+========================= */
+
+function drawParticles(){
+
+    particles.forEach(
+    p=>{
+
+        ctx.fillStyle=
+            "#ffd000";
+
+        ctx.globalAlpha=
+            p.life/25;
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            5,
+            5
+        );
+
+        ctx.globalAlpha=1;
+
+    });
+
+}
+
+
+/* =========================
+   MINIMAP
+========================= */
+
+function drawMiniMap(){
+
+    const size=125;
+    const x=W-size-12;
+    const y=H-size-12;
+
+    ctx.fillStyle="#061018dd";
+
+    ctx.fillRect(
+        x,
+        y,
+        size,
+        size
+    );
+
+    ctx.strokeStyle="#ffffff55";
+
+    ctx.strokeRect(
+        x,
+        y,
+        size,
+        size
+    );
+
+    const scale=
+        size/MAP;
+
+    /* player */
+
+    ctx.fillStyle="#00eaff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+player.x*scale,
+        y+player.y*scale,
+        4,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* enemies */
+
+    ctx.fillStyle="#ff3650";
+
+    enemies.forEach(
+    e=>{
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x+e.x*scale,
+            y+e.y*scale,
+            2,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+    });
+
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD(){
+
+    document.getElementById(
+        "level"
+    ).textContent=
+        level+" / 100";
+
+    document.getElementById(
+        "score"
+    ).textContent=
+        Math.floor(score);
+
+    document.getElementById(
+        "health"
+    ).style.width=
+        Math.max(
+            0,
+            health
+        )+"%";
+
+    document.getElementById(
+        "armor"
+    ).style.width=
+        Math.max(
+            0,
+            armor
+        )+"%";
+
+}
+
+
+/* =========================
+   COMPLETE LEVEL
+========================= */
+
+function completeLevel(){
+
+    if(!playing)
+        return;
+
+    playing=false;
+
+    score+=
+        250+
+        level*25;
+
+    if(level<100){
+
+        document.getElementById(
+            "resultText"
+        ).innerHTML=
+        "🎯 Mission completed!<br><br>"+
+        "⭐ Level "+level+
+        " completed.<br>"+
+        "🏆 Score: "+Math.floor(score);
+
+    }else{
+
+        document.getElementById(
+            "resultText"
+        ).innerHTML=
+        "👑 CONGRATULATIONS!<br><br>"+
+        "You completed all 100 levels!<br>"+
+        "🏆 Final Score: "+
+        Math.floor(score);
+
+    }
+
+    document.getElementById(
+        "gameOver"
+    ).style.display="flex";
+
+    saveProgress();
+
+}
+
+
+/* =========================
+   NEXT LEVEL
+========================= */
+
+function nextLevel(){
+
+    document.getElementById(
+        "gameOver"
+    ).style.display="none";
+
+    if(level>=100){
+
+        level=1;
+        score=0;
+
+    }else{
+
+        level++;
+
+    }
+
+    playing=true;
+
+    resetPlayer();
+
+    setupMission();
+
+    spawnEnemies();
+
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver(){
+
+    playing=false;
+
+    document.getElementById(
+        "resultText"
+    ).innerHTML=
+    "💥 Mission failed.<br><br>"+
+    "Score: "+Math.floor(score)+
+    "<br>Level reached: "+level;
+
+    document.getElementById(
+        "gameOver"
+    ).style.display="flex";
+
+    saveProgress();
+
+}
+
+
+/* =========================
+   EMOTE
+========================= */
+
+function emote(){
+
+    const list=[
+        "😎",
+        "🔥",
+        "👑",
+        "💪",
+        "😂",
+        "⚡"
+    ];
+
+    const text=
+        list[
+            Math.floor(
+                Math.random()*list.length
+            )
+        ];
+
+    const el=
+        document.getElementById(
+            "emoteText"
+        );
+
+    el.textContent=text;
+
+    el.style.display="block";
+
+    setTimeout(
+        ()=>{
+            el.style.display="none";
+        },
+        850
+    );
+
+}
+
+
+/* =========================
+   PAUSE
+========================= */
+
+document.getElementById(
+    "pause"
+).onclick=()=>{
+
+    if(!playing)
+        return;
+
+    paused=!paused;
+
+    document.getElementById(
+        "pause"
+    ).textContent=
+        paused
+        ?"▶"
+        :"Ⅱ";
+
+};
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+addEventListener(
+"keydown",
+e=>{
+
+    keys[e.key]=true;
+
+    if(e.key===" "){
+        shoot();
+    }
+
+    if(e.key==="r"){
+        reload();
+    }
+
+    if(e.key==="e"){
+        emote();
+    }
+
+});
+
+addEventListener(
+"keyup",
+e=>{
+    keys[e.key]=false;
+});
+
+
+/* =========================
+   MOBILE CONTROLS
+========================= */
+
+function hold(id,key){
+
+    const el=
+        document.getElementById(id);
+
+    el.addEventListener(
+        "touchstart",
+        e=>{
+            e.preventDefault();
+            keys[key]=true;
+        },
+        {passive:false}
+    );
+
+    el.addEventListener(
+        "touchend",
+        e=>{
+            e.preventDefault();
+            keys[key]=false;
+        },
+        {passive:false}
+    );
+
+    el.addEventListener(
+        "mousedown",
+        ()=>{
+            keys[key]=true;
+        }
+    );
+
+    el.addEventListener(
+        "mouseup",
+        ()=>{
+            keys[key]=false;
+        }
+    );
+
+}
+
+hold("up","ArrowUp");
+hold("down","ArrowDown");
+hold("left","ArrowLeft");
+hold("right","ArrowRight");
+
+
+document.getElementById(
+    "fire"
+).addEventListener(
+    "touchstart",
+    e=>{
+        e.preventDefault();
+        shoot();
+    },
+    {passive:false}
+);
+
+document.getElementById(
+    "fire"
+).onclick=shoot;
+
+document.getElementById(
+    "reload"
+).onclick=reload;
+
+document.getElementById(
+    "emote"
+).onclick=emote;
+
+
+/* =========================
+   GAME LOOP
+========================= */
+
+function loop(){
+
+    if(playing){
+
+        update();
+        draw();
+
+    }else{
+
+        draw();
+
+    }
+
+    requestAnimationFrame(loop);
+
+}
+
+loop();
+
+</script>
+
+</body>
+  </html>
